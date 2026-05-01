@@ -7,7 +7,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { sendMessage, startChatSession, initGemini } from '../services/geminiService';
-import { STATE_SEATS, RAJYA_SABHA_SEATS, VIDHAN_SABHA_SEATS, ELECTION_CONCEPTS, VOTING_STEPS } from '../data/electionData';
+import { STATE_SEATS, RAJYA_SABHA_SEATS, VIDHAN_SABHA_SEATS, ELECTION_CONCEPTS } from '../data/electionData';
+import { trackAIChatInteraction } from '../services/firebaseConfig';
 import './Assistant.css';
 
 const QUICK_ACTIONS = [
@@ -167,6 +168,7 @@ export default function Assistant() {
         content: response,
         timestamp: new Date(),
       }]);
+      trackAIChatInteraction('gemini_api', false);
     } catch (error) {
       // Use smart fallback
       const fallback = getSmartFallback(messageText);
@@ -175,6 +177,7 @@ export default function Assistant() {
         content: fallback,
         timestamp: new Date(),
       }]);
+      trackAIChatInteraction('fallback', true);
     }
 
     setIsTyping(false);

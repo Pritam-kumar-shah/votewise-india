@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { VOTING_STEPS } from '../data/electionData';
+import { trackSimulatorCompletion } from '../services/firebaseConfig';
 import './Simulate.css';
 
 export default function Simulate() {
@@ -23,6 +24,7 @@ export default function Simulate() {
       setCurrentStep(currentStep + 1);
     } else {
       setShowCelebration(true);
+      trackSimulatorCompletion(VOTING_STEPS.length);
     }
   };
 

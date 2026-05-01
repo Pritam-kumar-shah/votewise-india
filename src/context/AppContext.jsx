@@ -6,6 +6,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { A11Y_DEFAULTS } from '../utils/constants';
+import { trackLanguageChange } from '../services/firebaseConfig';
 
 const AppContext = createContext(null);
 
@@ -48,7 +49,11 @@ export function AppProvider({ children }) {
   }, [accessibility]);
 
   const toggleLanguage = useCallback(() => {
-    setLanguage(prev => prev === 'en' ? 'hi' : 'en');
+    setLanguage(prev => {
+      const newLang = prev === 'en' ? 'hi' : 'en';
+      trackLanguageChange(newLang);
+      return newLang;
+    });
   }, []);
 
   const updateAccessibility = useCallback((key, value) => {

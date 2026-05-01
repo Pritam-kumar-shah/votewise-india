@@ -134,6 +134,22 @@ export default function Home() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7V4h16v3" stroke="var(--chakra-blue)" strokeWidth="2"/><path d="M9 20h6" stroke="var(--chakra-blue)" strokeWidth="2"/><path d="M12 4v16" stroke="var(--chakra-blue)" strokeWidth="2"/></svg>
                 Google Fonts
               </span>
+              <span className="hero__service-chip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="var(--saffron)" strokeWidth="2"/><circle cx="12" cy="7" r="4" stroke="var(--saffron)" strokeWidth="2"/></svg>
+                Firebase Auth
+              </span>
+              <span className="hero__service-chip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 10h16M4 14h10M4 18h7" stroke="var(--green)" strokeWidth="2" strokeLinecap="round"/></svg>
+                Cloud Firestore
+              </span>
+              <span className="hero__service-chip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="var(--saffron)" stroke="var(--saffron)" strokeWidth="1"/></svg>
+                Firebase Hosting
+              </span>
+              <span className="hero__service-chip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3v18h18" stroke="var(--green)" strokeWidth="2"/><path d="M7 16l4-4 4 4 6-6" stroke="var(--green)" strokeWidth="2"/></svg>
+                Firebase Analytics
+              </span>
             </div>
           </div>
         </div>

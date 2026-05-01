@@ -3,3 +3,6 @@
  */
 
 import '@testing-library/jest-dom';
+
+// Mock scrollIntoView for jsdom (not implemented in jsdom)
+Element.prototype.scrollIntoView = () => {};

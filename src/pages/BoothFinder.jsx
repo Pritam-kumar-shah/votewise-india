@@ -6,6 +6,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { INDIAN_STATES } from '../data/electionData';
+import { trackBoothSearch } from '../services/firebaseConfig';
 import './BoothFinder.css';
 
 const MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -22,6 +23,68 @@ export default function BoothFinder() {
   const [userLocation, setUserLocation] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
+
+  /**
+   * Clear all existing markers from the map
+   */
+  const clearMarkers = useCallback(() => {
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+  }, []);
+
+  /**
+   * Add booth markers to the map
+   * @param {Array} booths - Array of booth objects with lat/lng
+   * @param {object|null} centerLocation - Optional center location
+   */
+  const addBoothMarkers = useCallback((booths, centerLocation = null) => {
+    booths.forEach((booth, i) => {
+      const marker = new window.google.maps.Marker({
+        position: { lat: booth.lat, lng: booth.lng },
+        map: mapInstanceRef.current,
+        title: booth.name,
+        label: {
+          text: String(i + 1),
+          color: '#FFFFFF',
+          fontSize: '12px',
+          fontWeight: '700',
+        },
+        icon: {
+          path: 'M12 0C7.31 0 3.5 3.81 3.5 8.5C3.5 14.88 12 24 12 24S20.5 14.88 20.5 8.5C20.5 3.81 16.69 0 12 0Z',
+          fillColor: '#FF6B35',
+          fillOpacity: 1,
+          strokeColor: '#FFFFFF',
+          strokeWeight: 2,
+          scale: 1.5,
+          anchor: new window.google.maps.Point(12, 24),
+          labelOrigin: new window.google.maps.Point(12, 9),
+        },
+      });
+
+      const infoWindow = new window.google.maps.InfoWindow({
+        content: `
+          <div style="padding:8px;font-family:Inter,sans-serif">
+            <strong style="font-size:14px">${booth.name}</strong>
+            <p style="font-size:12px;color:#64748B;margin:4px 0 0">${booth.address || ''}</p>
+          </div>
+        `,
+      });
+
+      marker.addListener('click', () => {
+        infoWindow.open(mapInstanceRef.current, marker);
+      });
+
+      markersRef.current.push(marker);
+    });
+
+    // Fit bounds to show all markers
+    if (booths.length > 0) {
+      const bounds = new window.google.maps.LatLngBounds();
+      booths.forEach(b => bounds.extend({ lat: b.lat, lng: b.lng }));
+      if (centerLocation) bounds.extend(centerLocation);
+      mapInstanceRef.current.fitBounds(bounds);
+    }
+  }, []);
 
   // Load Google Maps script
   useEffect(() => {
@@ -62,7 +125,7 @@ export default function BoothFinder() {
         document.head.removeChild(script);
       }
     };
-  }, []);
+  }, [t]);
 
   // Initialize map once loaded
   useEffect(() => {
@@ -82,6 +145,45 @@ export default function BoothFinder() {
       fullscreenControl: true,
     });
   }, [mapLoaded]);
+
+  // Search for polling booths nearby (Places API)
+  const searchNearby = useCallback((location) => {
+    if (!mapInstanceRef.current || !window.google?.maps?.places) return;
+
+    setSearching(true);
+    clearMarkers();
+
+    const service = new window.google.maps.places.PlacesService(mapInstanceRef.current);
+    
+    service.nearbySearch(
+      {
+        location: location,
+        radius: 5000,
+        keyword: 'polling booth voting station government school',
+        type: 'school',
+      },
+      (results, status) => {
+        setSearching(false);
+
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+          const boothResults = results.slice(0, 8).map((place, i) => ({
+            id: i,
+            name: place.name,
+            address: place.vicinity,
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+            rating: place.rating,
+          }));
+
+          setSearchResults(boothResults);
+          trackBoothSearch('geolocation', boothResults.length);
+          addBoothMarkers(boothResults, location);
+        } else {
+          setSearchResults([]);
+        }
+      }
+    );
+  }, [clearMarkers, addBoothMarkers]);
 
   // Get user's current location
   const getUserLocation = useCallback(() => {
@@ -121,99 +223,14 @@ export default function BoothFinder() {
           searchNearby(loc);
         }
       },
-      (error) => {
+      () => {
         setErrorMsg(t(
           'Location access denied. Please enter your area name to search.',
           'लोकेशन एक्सेस अस्वीकृत। कृपया सर्च करने के लिए अपने क्षेत्र का नाम दर्ज करें।'
         ));
       }
     );
-  }, [mapLoaded]);
-
-  // Search for polling booths nearby
-  const searchNearby = useCallback((location) => {
-    if (!mapInstanceRef.current || !window.google?.maps?.places) return;
-
-    setSearching(true);
-    clearMarkers();
-
-    const service = new window.google.maps.places.PlacesService(mapInstanceRef.current);
-    
-    service.nearbySearch(
-      {
-        location: location,
-        radius: 5000,
-        keyword: 'polling booth voting station government school',
-        type: 'school',
-      },
-      (results, status) => {
-        setSearching(false);
-
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-          const boothResults = results.slice(0, 8).map((place, i) => ({
-            id: i,
-            name: place.name,
-            address: place.vicinity,
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng(),
-            rating: place.rating,
-          }));
-
-          setSearchResults(boothResults);
-
-          // Add markers
-          boothResults.forEach((booth, i) => {
-            const marker = new window.google.maps.Marker({
-              position: { lat: booth.lat, lng: booth.lng },
-              map: mapInstanceRef.current,
-              title: booth.name,
-              label: {
-                text: String(i + 1),
-                color: '#FFFFFF',
-                fontSize: '12px',
-                fontWeight: '700',
-              },
-              icon: {
-                path: 'M12 0C7.31 0 3.5 3.81 3.5 8.5C3.5 14.88 12 24 12 24S20.5 14.88 20.5 8.5C20.5 3.81 16.69 0 12 0Z',
-                fillColor: '#FF6B35',
-                fillOpacity: 1,
-                strokeColor: '#FFFFFF',
-                strokeWeight: 2,
-                scale: 1.5,
-                anchor: new window.google.maps.Point(12, 24),
-                labelOrigin: new window.google.maps.Point(12, 9),
-              },
-            });
-
-            const infoWindow = new window.google.maps.InfoWindow({
-              content: `
-                <div style="padding:8px;font-family:Inter,sans-serif">
-                  <strong style="font-size:14px">${booth.name}</strong>
-                  <p style="font-size:12px;color:#64748B;margin:4px 0 0">${booth.address || ''}</p>
-                </div>
-              `,
-            });
-
-            marker.addListener('click', () => {
-              infoWindow.open(mapInstanceRef.current, marker);
-            });
-
-            markersRef.current.push(marker);
-          });
-
-          // Fit bounds to show all markers
-          if (boothResults.length > 0) {
-            const bounds = new window.google.maps.LatLngBounds();
-            boothResults.forEach(b => bounds.extend({ lat: b.lat, lng: b.lng }));
-            if (location) bounds.extend(location);
-            mapInstanceRef.current.fitBounds(bounds);
-          }
-        } else {
-          setSearchResults([]);
-        }
-      }
-    );
-  }, []);
+  }, [searchNearby, t]);
 
   // Text search for booths
   const handleSearch = useCallback(() => {
@@ -223,12 +240,12 @@ export default function BoothFinder() {
     clearMarkers();
     setErrorMsg('');
 
-    const query = `polling booth voting station near ${searchQuery} ${selectedState}`.trim();
+    const searchString = `polling booth voting station near ${searchQuery} ${selectedState}`.trim();
 
     const service = new window.google.maps.places.PlacesService(mapInstanceRef.current);
     
     service.textSearch(
-      { query: query },
+      { query: searchString },
       (results, status) => {
         setSearching(false);
 
@@ -242,51 +259,8 @@ export default function BoothFinder() {
           }));
 
           setSearchResults(boothResults);
-
-          boothResults.forEach((booth, i) => {
-            const marker = new window.google.maps.Marker({
-              position: { lat: booth.lat, lng: booth.lng },
-              map: mapInstanceRef.current,
-              title: booth.name,
-              label: {
-                text: String(i + 1),
-                color: '#FFFFFF',
-                fontSize: '12px',
-                fontWeight: '700',
-              },
-              icon: {
-                path: 'M12 0C7.31 0 3.5 3.81 3.5 8.5C3.5 14.88 12 24 12 24S20.5 14.88 20.5 8.5C20.5 3.81 16.69 0 12 0Z',
-                fillColor: '#FF6B35',
-                fillOpacity: 1,
-                strokeColor: '#FFFFFF',
-                strokeWeight: 2,
-                scale: 1.5,
-                anchor: new window.google.maps.Point(12, 24),
-                labelOrigin: new window.google.maps.Point(12, 9),
-              },
-            });
-
-            const infoWindow = new window.google.maps.InfoWindow({
-              content: `
-                <div style="padding:8px;font-family:Inter,sans-serif">
-                  <strong style="font-size:14px">${booth.name}</strong>
-                  <p style="font-size:12px;color:#64748B;margin:4px 0 0">${booth.address || ''}</p>
-                </div>
-              `,
-            });
-
-            marker.addListener('click', () => {
-              infoWindow.open(mapInstanceRef.current, marker);
-            });
-
-            markersRef.current.push(marker);
-          });
-
-          if (boothResults.length > 0) {
-            const bounds = new window.google.maps.LatLngBounds();
-            boothResults.forEach(b => bounds.extend({ lat: b.lat, lng: b.lng }));
-            mapInstanceRef.current.fitBounds(bounds);
-          }
+          trackBoothSearch('manual_search', boothResults.length);
+          addBoothMarkers(boothResults);
         } else {
           setSearchResults([]);
           setErrorMsg(t(
@@ -296,12 +270,7 @@ export default function BoothFinder() {
         }
       }
     );
-  }, [searchQuery, selectedState]);
-
-  const clearMarkers = () => {
-    markersRef.current.forEach(m => m.setMap(null));
-    markersRef.current = [];
-  };
+  }, [searchQuery, selectedState, clearMarkers, addBoothMarkers, t]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -394,7 +363,7 @@ export default function BoothFinder() {
 
             {/* Error message */}
             {errorMsg && (
-              <div className="booth-error">
+              <div className="booth-error" role="alert" aria-live="assertive">
                 <span>⚠️</span>
                 <p>{errorMsg}</p>
               </div>

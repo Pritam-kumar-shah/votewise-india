@@ -202,50 +202,20 @@ export async function explainConcept(concept, language = 'en') {
 }
 
 /**
- * Sanitize user input to prevent injection
+ * Sanitize user input to prevent injection attacks
+ * Removes HTML tags, encodes special characters, and limits length
  * @param {string} input - Raw user input
- * @returns {string} Sanitized input
+ * @returns {string} Sanitized input safe for processing
  */
-function sanitizeInput(input) {
+export function sanitizeInput(input) {
   if (typeof input !== 'string') return '';
   
   return input
     .trim()
-    .slice(0, 1000) // Limit input length
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .slice(0, 1000) // Limit input length to prevent abuse
+    .replace(/<[^>]*>/g, '') // Remove HTML tags (XSS prevention)
     .replace(/[<>'"]/g, (char) => {
       const entities = { '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
       return entities[char] || char;
     });
-}
-
-/**
- * Fallback responses when Gemini is unavailable
- * @param {string} message - User's message
- * @returns {string} Fallback response
- */
-function getFallbackResponse(message) {
-  const lower = message.toLowerCase();
-  
-  if (lower.includes('register') || lower.includes('registration') || lower.includes('पंजीकरण')) {
-    return "📝 **Voter Registration Guide:**\n\n1. Visit the NVSP portal: **voters.eci.gov.in**\n2. Fill **Form 6** for new registration\n3. Upload required documents (age proof, address proof, photo)\n4. Submit and note your reference number\n5. A BLO (Booth Level Officer) will verify your details\n\n💡 **Tip:** You can also use the **Voter Helpline App** on your smartphone for easy registration!";
-  }
-  
-  if (lower.includes('evm') || lower.includes('voting machine')) {
-    return "🗳️ **Electronic Voting Machine (EVM):**\n\nEVMs have been used in Indian elections since 1982. Key points:\n\n• **Two units:** Control Unit (with polling officer) and Ballot Unit (in voting compartment)\n• **Standalone device:** Not connected to any network — cannot be hacked remotely\n• **Battery operated:** Works without electricity\n• **One vote:** Locks after each vote, preventing multiple votes\n\n💡 **Tip:** Since 2019, every EVM is paired with a **VVPAT** machine for paper verification!";
-  }
-  
-  if (lower.includes('nota') || lower.includes('none of the above')) {
-    return "❌ **NOTA (None of the Above):**\n\nNOTA was introduced by the **Supreme Court of India** in September 2013 (PUCL vs Union of India case).\n\n• It appears as the **last option** on the EVM\n• Allows voters to **officially reject** all candidates\n• NOTA votes are **counted** but currently don't affect election results\n• Over **1.5 crore** NOTA votes were cast in the 2019 general elections\n\n💡 NOTA is your democratic right to express disapproval while still participating in the election!";
-  }
-  
-  if (lower.includes('eligib') || lower.includes('who can vote') || lower.includes('पात्रता')) {
-    return "👤 **Voter Eligibility in India:**\n\n✅ You can vote if:\n• You are an **Indian citizen**\n• You are **18 years or older** (as of Jan 1 of the qualifying year)\n• You are **registered** as a voter in your constituency\n• You are of **sound mind** and not disqualified by law\n\n❌ You cannot vote if:\n• You are a non-citizen\n• You are below 18 years of age\n• You have been disqualified under any election law\n\n💡 **Tip:** Check your registration status at **voters.eci.gov.in**";
-  }
-
-  if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey') || lower.includes('नमस्ते')) {
-    return "🙏 **Namaste! Welcome to VoteWise AI!**\n\nI'm your election education assistant. I can help you with:\n\n• 📝 Voter registration process\n• 🗳️ Understanding EVM & VVPAT\n• 📍 Finding your constituency\n• 📅 Election phases & timeline\n• ❓ Any questions about Indian elections\n\nWhat would you like to know? Ask me anything about the Indian electoral process!";
-  }
-  
-  return "🙏 I'm VoteWise AI, your election education assistant!\n\nI can help you understand:\n• **Voter registration** — How to register and required documents\n• **Voting process** — Step-by-step guide for election day\n• **EVM & VVPAT** — How voting machines work\n• **Your rights** — NOTA, postal ballot, and more\n• **Election rules** — MCC, election phases, and procedures\n\n💡 Try asking specific questions like *\"How do I register to vote?\"* or *\"What is NOTA?\"*\n\n⚠️ *Note: I provide educational information only. I never express political opinions or party preferences.*";
 }

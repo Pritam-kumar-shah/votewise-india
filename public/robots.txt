@@ -1,0 +1,8 @@
+# VoteWise India — Robots.txt
+# https://votewise-india-2026.web.app
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://votewise-india-2026.web.app/sitemap.xml

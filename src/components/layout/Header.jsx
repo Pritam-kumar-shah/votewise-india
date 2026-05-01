@@ -3,16 +3,33 @@
  * Navigation bar with language toggle and accessibility
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { NAV_LINKS, APP_NAME } from '../../utils/constants';
+import { signInWithGoogle, signOut, onAuthChange } from '../../services/firebaseConfig';
 import './Header.css';
 
 export default function Header() {
   const { language, toggleLanguage, t } = useAppContext();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  
+  useEffect(() => {
+    const unsubscribe = onAuthChange((currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleAuth = async () => {
+    if (user) {
+      await signOut();
+    } else {
+      await signInWithGoogle();
+    }
+  };
 
   return (
     <header className="header" role="banner">
@@ -47,6 +64,21 @@ export default function Header() {
 
         {/* Actions */}
         <div className="header__actions">
+          {/* Auth Button */}
+          {user ? (
+            <div className="header__user-profile" title={user.displayName}>
+              <img src={user.photoURL} alt="Profile" className="header__user-avatar" />
+              <button className="header__auth-btn" onClick={handleAuth}>
+                {t('Sign Out', 'लॉग आउट')}
+              </button>
+            </div>
+          ) : (
+            <button className="header__auth-btn header__auth-btn--login" onClick={handleAuth}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{marginRight: '6px'}}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor"/></svg>
+              {t('Sign In', 'साइन इन')}
+            </button>
+          )}
+
           {/* Language Toggle */}
           <button
             className="header__lang-btn"

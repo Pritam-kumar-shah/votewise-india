@@ -5,16 +5,78 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="VoteWise India — AI-powered election education platform for Indian voters. Learn about voting, find your constituency, and understand the election process." />
-    <meta name="keywords" content="India elections, voter education, election process, AI assistant, constituency finder, voting guide" />
+    <meta name="keywords" content="India elections, voter education, election process, AI assistant, constituency finder, voting guide, EVM, VVPAT, NOTA" />
     <meta name="author" content="VoteWise India" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://maps.googleapis.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://generativelanguage.googleapis.com https://maps.googleapis.com;" />
+    <meta name="theme-color" content="#FF6B35" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://votewise-india-2026.web.app/" />
+    <meta property="og:title" content="VoteWise India — AI Election Education Platform" />
+    <meta property="og:description" content="India's smartest election education platform. Learn the voting process, understand your rights, and become a confident voter — powered by Google Gemini AI." />
+    <meta property="og:site_name" content="VoteWise India" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="VoteWise India — AI Election Education Platform" />
+    <meta name="twitter:description" content="AI-powered election education platform for Indian voters. Learn about voting, EVM, VVPAT, NOTA and more." />
+
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://www.googletagmanager.com https://www.google-analytics.com https://*.firebaseio.com https://*.googleapis.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://generativelanguage.googleapis.com https://maps.googleapis.com https://*.google-analytics.com https://*.analytics.google.com https://*.firebaseio.com https://*.googleapis.com https://firebaseinstallations.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com ws://localhost:* http://localhost:*; frame-src 'self' https://votewise-india-2026.firebaseapp.com https://*.firebaseapp.com;" />
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://votewise-india-2026.web.app/" />
+
     <title>VoteWise India — AI Election Education Platform</title>
+
+    <!-- Structured Data (JSON-LD) for Google Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "VoteWise India",
+      "description": "AI-powered election education platform for Indian voters. Learn about voting, EVM, VVPAT, NOTA, find polling booths, and take quizzes.",
+      "url": "https://votewise-india-2026.web.app",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "VoteWise India"
+      },
+      "inLanguage": ["en", "hi"],
+      "isAccessibleForFree": true,
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "Indian Voters"
+      },
+      "featureList": [
+        "AI Election Assistant powered by Google Gemini",
+        "Interactive Voting Simulator",
+        "Polling Booth Finder with Google Maps",
+        "Election Knowledge Hub",
+        "AI-Generated Quiz",
+        "Multi-language Support (Hindi/English)"
+      ]
+    }
+    </script>
   </head>
   <body>
+    <!-- Skip to main content for accessibility -->
     <div id="root"></div>
+    <noscript>
+      <p>You need to enable JavaScript to run VoteWise India. This app is an AI-powered election education platform that requires JavaScript for its interactive features.</p>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
