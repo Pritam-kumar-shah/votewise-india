@@ -50,6 +50,7 @@ describe('Firebase Configuration', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.resetModules();
+    localStorage.clear();
     firebaseConfig = await import('../services/firebaseConfig');
   });
 
@@ -117,7 +118,7 @@ describe('Firebase Configuration', () => {
   describe('Cloud Firestore — Quiz Scores', () => {
     it('saveQuizScore should handle null userId', async () => {
       const result = await firebaseConfig.saveQuizScore(null, { topic: 'test', score: 3, total: 5 });
-      expect(result).toBeNull();
+      expect(result).toContain('local-id-');
     });
 
     it('saveQuizScore should not throw with valid data', async () => {
@@ -127,6 +128,7 @@ describe('Firebase Configuration', () => {
     });
 
     it('getQuizHistory should return empty array for null userId', async () => {
+      localStorage.clear(); // Ensure clean local state
       const result = await firebaseConfig.getQuizHistory(null);
       expect(result).toEqual([]);
     });

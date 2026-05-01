@@ -19,6 +19,8 @@ vi.mock('../services/firebaseConfig', () => ({
   trackLanguageChange: vi.fn(),
   trackEvent: vi.fn(),
   initFirebase: vi.fn().mockResolvedValue(null),
+  onAuthChange: vi.fn((cb) => { cb(null); return () => {}; }),
+  getQuizHistory: vi.fn().mockResolvedValue([]),
 }));
 
 // Mock Gemini service
